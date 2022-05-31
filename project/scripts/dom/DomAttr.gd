@@ -1,4 +1,4 @@
-extends Node
+extends DomNode
 class_name DomAttr
 ## https://dom.spec.whatwg.org/#attr
 

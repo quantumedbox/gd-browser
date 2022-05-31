@@ -9,7 +9,7 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "Node",
+"base": "DomNode",
 "class": "DomAttr",
 "language": "GDScript",
 "path": "res://scripts/dom/DomAttr.gd"
@@ -62,6 +62,7 @@ run/main_scene="res://scenes/Browser.tscn"
 [autoload]
 
 Shared="*res://scripts/Shared.gd"
+DomInterface="*res://scripts/DomInterface.gd"
 
 [physics]
 

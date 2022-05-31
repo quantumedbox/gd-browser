@@ -15,14 +15,19 @@ func _ready() -> void:
   OS.low_processor_usage_mode = true
   Shared.ok(self.n_SearchBox.connect("text_entered", self, "_on_search_made"))
   Shared.ok(self.n_HTTPRequest.connect("request_completed", self, "_on_request_completed"))
-  self.n_HTMLParser.stop_on_first_error = true
+  self.n_HTMLParser.stop_on_first_error = false
   self.n_HTTPRequest.use_threads = true
 
   if OS.has_feature("debug"):
-    _on_search_made("http://histo.io/")
+    request_page("https://www.webfx.com/archive/blog/images/assets/cdn.sixrevisions.com/0435-01_html5_download_attribute_demo/samp/htmldoc.html")
 
 
 func _on_search_made(url: String) -> void:
+  request_page(url)
+
+
+func request_page(url: String) -> void:
+  # todo: Mutex on n_HTTPRequest so that only one request will go at the time
   if self.n_HTTPRequest.request(url) != OK:
       push_error("An error occurred in the HTTP request.")
 
@@ -45,7 +50,8 @@ func _on_request_completed(result: int, response_code: int, headers: PoolStringA
     push_error("Invalid HTML document")
     return
 
-  Shared.dump_node_tree(body_parsed)
+  # if OS.has_feature("debug"):
+  #   Shared.dump_node_tree(body_parsed)
 
   _nuke_tree(self.n_DOM)
   _nuke_tree(self.n_PageCanvas)
@@ -103,30 +109,38 @@ func _populate_tree(root: Node, desc: Dictionary, url: String) -> void:
       _populate_tree(this, child, url)
 
 
-static func _render_dom(node: DomNode, page_canvas: Container) -> void:
+static func _render_dom(node: DomDocument, page_canvas: Container) -> void:
   ## Naive and incorrect
-  if node is DomElement:
-    _render_dom_element(node, page_canvas)
-  else: pass
-
   for child in node.get_children():
-    _render_dom(child, page_canvas)
+    if child is DomElement and child.tag_name == "html":
+      _render_element(child, page_canvas)
 
 
-static func _render_dom_element(elem: DomElement, page_canvas: Container) -> void:
-  # todo: Translate HTML/XHTML markup to BBCode rudely
-  match elem.tag_name:
-    "p":
-      var text := _collect_text(elem)
-      if not text.empty():
-        var p := preload("res://scenes/elements/Paragraph.tscn").instance()
-        p.text = text
-        page_canvas.add_child(p)
+static func _render_node(node: DomNode, page_canvas: Container) -> void:
+  ## Generic dispatcher
+  if node is DomElement:
+    _render_element(node, page_canvas)
+  elif node is DomText:
+    var text_node := preload("res://scenes/Text.tscn").instance()
+    text_node.text = node.data
+    page_canvas.add_child(text_node)
 
 
-static func _collect_text(root: DomNode) -> String:
-  var result: String
-  for child in root.get_children():
-    if child is DomText:
-      result += child.data
-  return result
+static func _render_element(node: DomElement, page_canvas: Container) -> void:
+  # todo: Sectioning tags
+  match node.tag_name:
+    "title": pass
+      # todo: Display page title
+    "meta", "base", "head", "link", "style": pass
+      # Ignored metadata tags
+    "div", "h1", "p":
+      # Text content elements
+      var text_content = DomInterface.get_text_content(node)
+      if text_content:
+        var text_node := preload("res://scenes/Text.tscn").instance()
+        text_node.text = text_content
+        page_canvas.add_child(text_node)
+    _:
+      # For now unknown tags are used for propagation further down the tree
+      for child in node.get_children():
+        _render_node(child, page_canvas)

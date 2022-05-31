@@ -19,12 +19,12 @@ margin_bottom = 24.0
 
 [node name="Label" type="Label" parent="HBoxContainer"]
 margin_top = 5.0
-margin_right = 30.0
+margin_right = 29.0
 margin_bottom = 19.0
-text = "Link:"
+text = "URL:"
 
 [node name="SearchBox" type="LineEdit" parent="HBoxContainer"]
-margin_left = 34.0
+margin_left = 33.0
 margin_right = 1024.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
@@ -33,7 +33,15 @@ caret_blink_speed = 0.5
 
 [node name="DOM" type="Node" parent="."]
 
-[node name="PageCanvas" type="VBoxContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
 margin_top = 28.0
 margin_right = 1024.0
-margin_bottom = 28.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PageCanvas" type="VBoxContainer" parent="ScrollContainer"]
+margin_right = 1024.0
+margin_bottom = 572.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
