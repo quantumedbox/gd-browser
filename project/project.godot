@@ -1,0 +1,75 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+_global_script_classes=[ {
+"base": "Node",
+"class": "DomAttr",
+"language": "GDScript",
+"path": "res://scripts/dom/DomAttr.gd"
+}, {
+"base": "DomNode",
+"class": "DomCharacterData",
+"language": "GDScript",
+"path": "res://scripts/dom/DomCharacterData.gd"
+}, {
+"base": "DomNode",
+"class": "DomDocument",
+"language": "GDScript",
+"path": "res://scripts/dom/DomDocument.gd"
+}, {
+"base": "DomNode",
+"class": "DomDocumentType",
+"language": "GDScript",
+"path": "res://scripts/dom/DomDocumentType.gd"
+}, {
+"base": "DomNode",
+"class": "DomElement",
+"language": "GDScript",
+"path": "res://scripts/dom/DomElement.gd"
+}, {
+"base": "Node",
+"class": "DomNode",
+"language": "GDScript",
+"path": "res://scripts/dom/DomNode.gd"
+}, {
+"base": "DomCharacterData",
+"class": "DomText",
+"language": "GDScript",
+"path": "res://scripts/dom/DomText.gd"
+} ]
+_global_script_class_icons={
+"DomAttr": "",
+"DomCharacterData": "",
+"DomDocument": "",
+"DomDocumentType": "",
+"DomElement": "",
+"DomNode": "",
+"DomText": ""
+}
+
+[application]
+
+config/name="Project"
+run/main_scene="res://scenes/Browser.tscn"
+
+[autoload]
+
+Shared="*res://scripts/Shared.gd"
+
+[physics]
+
+common/enable_pause_aware_picking=true
+
+[rendering]
+
+quality/driver/driver_name="GLES2"
+vram_compression/import_etc=true
+vram_compression/import_etc2=false
+environment/default_environment="res://default_env.tres"

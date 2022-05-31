@@ -1,0 +1,3 @@
+[submodule "gd-gumbo"]
+	path = gd-gumbo
+	url = https://github.com/quantumedbox/gd-gumbo
