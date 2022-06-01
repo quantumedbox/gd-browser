@@ -8,7 +8,7 @@ Firefox rendition:
 
 Current gd-browser state:
 
-![...there should be image too](/assets/images/gd-gumbo.png)
+![...there should be image too](/assets/images/gd-browser.png)
 
 ## TODO
 - Interpreting of basic sectioning elements
