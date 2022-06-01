@@ -8,13 +8,13 @@ var _font_cache: Dictionary
 
 const DEFAULT_FAMILY := "Roboto"
 const DEFAULT_TYPEFACE := "Regular"
-const DEFAULT_SIZE := 15
+const DEFAULT_SIZE := 16
 
 
 func _ready() -> void:
   var default_font := preload("res://resources/DefaultFont.tres") as Font
   _font_cache[DEFAULT_FAMILY] = {
-    "type": "sans-serif",
+    "font-family": "sans-serif",
     "path": "res://assets/fonts/roboto/",
     "typeface-data": {
       "Regular": default_font.font_data,
