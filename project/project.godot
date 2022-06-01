@@ -56,13 +56,18 @@ _global_script_class_icons={
 
 [application]
 
-config/name="Project"
+config/name="gd-browser"
+config/description="Simple browser implementation based on Godot UI system"
 run/main_scene="res://scenes/Browser.tscn"
+run/low_processor_mode=true
+run/low_processor_mode_sleep_usec=10000
+run/delta_sync_after_draw=true
 
 [autoload]
 
 Shared="*res://scripts/Shared.gd"
 DomInterface="*res://scripts/DomInterface.gd"
+FontManager="*res://scripts/FontManager.gd"
 
 [physics]
 
