@@ -2,19 +2,15 @@
 Firstly something to test [gd-gumbo](https://github.com/quantumedbox/gd-gumbo) for, but there's neat potential with this.
 
 ## Demo
-Firefox rendition:
-
-![there should be image...](/assets/images/firefox.png)
-
 Current gd-browser state:
 
-![...there should be image too](/assets/images/gd-browser.png)
+![screenshot of https://serenityos.org](/assets/images/gd-browser.png)
 
 ## TODO
 - Interpreting of basic sectioning elements
 - Simple attributes, such as links
+- Moving to new pages by clicking links
 - Inline text tags for styling of text, probably by using RichTextLabel and BBCode
-- Image loading
 - Parsing of HTTP response headers
 
 ## Experimental TODO
