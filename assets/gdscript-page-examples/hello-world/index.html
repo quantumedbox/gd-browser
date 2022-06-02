@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/gdscript">
+extends GDScriptScript
+func _ready() -> void:
+  var elem = document.get_element_by_id("hellower")
+  if elem != null:
+    elem.text_content = "hello world from gdscript!"
+  </script>
+<head>
+<body>
+  <p id="hellower">something went wrong... there should be hello world!?</p>
+</body>
+</html>

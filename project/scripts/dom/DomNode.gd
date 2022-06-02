@@ -1,6 +1,6 @@
 extends Node # todo: Should implement event listener, but do we need it?
 class_name DomNode
-# https://dom.spec.whatwg.org/#node
+## https://dom.spec.whatwg.org/#node
 
 enum {
   ELEMENT_NODE = 1,
@@ -21,8 +21,11 @@ func _set_text_content(text: String) -> void:
   # https://dom.spec.whatwg.org/#dom-node-textcontent
   match self.node_type:
     ELEMENT_NODE:
-      # todo:
-      push_error("Unimplemented")
+      var node = null
+      if not text.empty():
+        node = load("res://scripts/dom/DomText.gd").new() # todo: Kinda not great
+        node.data = text
+      self._replace_all(node)
 
     ATTRIBUTE_NODE:
       # todo:
@@ -68,34 +71,57 @@ func _get_length() -> int:
     _: return self.get_child_count()
 
 
+func _replace_all(node) -> void:
+  ## https://dom.spec.whatwg.org/#concept-node-replace-all
+  # Assumes `parent` as self
+  for child in self.get_children():
+    remove_child(child)
+    child.queue_free()
+  if node != null:
+    _insert(node, null)
+
+
+func _insert(node, child) -> void:
+  ## https://dom.spec.whatwg.org/#concept-node-insert
+  # Assumes `parent` as self
+  # var nodes := node.get_children()
+  # var count := nodes.size()
+  # if count == 0:
+  #   return
+  if child != null:
+    # todo:
+    push_error("Unimplemented")
+    return
+  self.add_child(node) # todo: Should be a lot more, lol
+  self._children_changed()
+
+
 func _children_changed() -> void:
   # to: Should signalize that render update is possibly needed to page
   push_error("Unimplemented")
 
 
+# todo: Rename? There could also be already something similar in DOM spec
 func _collect_descendants_by_type(node_type_: int) -> Array: # Array<DomNode>
   var result := Array()
-  var idx_stack := PoolIntArray()
-  var cur_stack := Array()
+  var stack := Array()
   var idx := 0
   var cur := self
   while true:
     while idx < cur.get_child_count():
       var node = cur.get_child(idx)
-      # assert(node is DomNode)
       if node.node_type == node_type_:
         result.push_back(node)
       if node.get_child_count() != 0:
-        idx_stack.push_back(idx + 1)
-        cur_stack.push_back(cur)
+        stack.push_back(cur)
+        stack.push_back(idx + 1)
         cur = node
         idx = -1
       idx += 1
-    if idx_stack.empty():
+    if stack.empty():
       break
-    idx = idx_stack[idx_stack.size() - 1]
-    idx_stack.remove(idx_stack.size() - 1)
-    cur = cur_stack.pop_back()
+    idx = stack.pop_back()
+    cur = stack.pop_back()
   return result
 
 

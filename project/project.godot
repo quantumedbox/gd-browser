@@ -34,6 +34,16 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://scripts/dom/DomElement.gd"
 }, {
+"base": "DomElement",
+"class": "DomHTMLElement",
+"language": "GDScript",
+"path": "res://scripts/dom/DomHTMLElement.gd"
+}, {
+"base": "DomHTMLElement",
+"class": "DomHTMLScriptElement",
+"language": "GDScript",
+"path": "res://scripts/dom/DomHTMLScriptElement.gd"
+}, {
 "base": "Node",
 "class": "DomNode",
 "language": "GDScript",
@@ -43,6 +53,11 @@ _global_script_classes=[ {
 "class": "DomText",
 "language": "GDScript",
 "path": "res://scripts/dom/DomText.gd"
+}, {
+"base": "Node",
+"class": "GDScriptScript",
+"language": "GDScript",
+"path": "res://scripts/GDScriptScript.gd"
 } ]
 _global_script_class_icons={
 "DomAttr": "",
@@ -50,8 +65,11 @@ _global_script_class_icons={
 "DomDocument": "",
 "DomDocumentType": "",
 "DomElement": "",
+"DomHTMLElement": "",
+"DomHTMLScriptElement": "",
 "DomNode": "",
-"DomText": ""
+"DomText": "",
+"GDScriptScript": ""
 }
 
 [application]
