@@ -2,6 +2,6 @@ extends DomCharacterData
 class_name DomText
 ## https://dom.spec.whatwg.org/#text
 
-func init(data: String = "") -> DomText:
-  self.data = data
-  return self
+
+func _init() -> void:
+  node_type = DomNode.TEXT_NODE

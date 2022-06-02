@@ -1,2 +1,7 @@
 project/bin/
 project/.import/
+*.sublime-*
+**/*.exe
+**/*.dll
+**/*.pck
+export_presets.cfg

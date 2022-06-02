@@ -1,5 +1,7 @@
 extends Node
 
+# todo: Wrap Godot global scope error codes to text descriptions
+
 # todo: Make it an array instead?
 const HTTPErrorToText := {
   HTTPRequest.RESULT_SUCCESS: "Success",
@@ -51,6 +53,6 @@ static func dump_node_tree(obj, indent: int = 0):
 
 
 static func drop_node_tree(node: Node) -> void:
-  for child in node:
+  for child in node.get_children():
     node.remove_child(child)
     child.queue_free()

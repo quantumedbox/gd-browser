@@ -5,3 +5,7 @@ class_name DomDocumentType
 var doctype_name: String
 var publicId: String
 var systemId: String
+
+
+func _init() -> void:
+  node_type = DomNode.DOCUMENT_TYPE_NODE

@@ -1,6 +1,11 @@
 extends Control
 
 # todo: Error message display to user, probably via console-like interface
+# todo: Remove extending of dom classes, rely on naming and presence of members for conveying implementation of interface
+#       Node types could be denoted by enum, giving the desired reflective capabilities
+
+
+const STARTUP_URL := "https://serenityos.org"
 
 onready var n_SearchBox := find_node("SearchBox")
 onready var n_Canvas := find_node("Canvas")
@@ -10,9 +15,8 @@ var n_Page: Node = null # todo: Temp
 
 func _ready() -> void:
   Shared.ok(self.n_SearchBox.connect("text_entered", self, "_on_search_made"))
-
-  if OS.has_feature("debug"):
-    request_page("https://serenityos.org")
+  request_page(STARTUP_URL)
+  n_SearchBox.text = STARTUP_URL
 
 
 func _on_search_made(url: String) -> void:
