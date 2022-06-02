@@ -6,6 +6,10 @@ Current gd-browser state:
 
 ![screenshot of https://serenityos.org](/assets/images/gd-browser.png)
 
+Basic support for GDScript in `<script>` elements
+
+![demonstration screenshot](/assets/images/script.png)
+
 ## TODO
 - Interpreting of basic sectioning elements
 - Simple attributes, such as links
@@ -14,5 +18,4 @@ Current gd-browser state:
 - Parsing of HTTP response headers
 
 ## Experimental TODO
-- Usage of GDScript as document scripting language
 - Ability to load Godot scenes as documents, and integrate them into page directly
