@@ -16,8 +16,7 @@ func _get_type() -> String:
 
 func _set_text(text_: String) -> void:
   ## https://html.spec.whatwg.org/multipage/scripting.html#dom-script-text
-  # todo:
-  push_error("Unimplemented")
+  Shared.unimplemented()
 
 
 func _get_text() -> String:
@@ -31,4 +30,3 @@ func _get_text() -> String:
 
 func _private_setter(_any) -> void:
   assert(false, "Private setter is used")
-

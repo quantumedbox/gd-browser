@@ -31,6 +31,10 @@ func do_assert(status: bool, msg: String = "") -> void:
     get_tree().quit(1)
 
 
+static func unimplemented() -> void:
+  push_error("Unimplemented: {source}:{function}:{line}".format(get_stack()[1]))
+
+
 static func ok(status: int, msg: String = "") -> void:
   assert(status == OK, msg)
 
@@ -56,3 +60,29 @@ static func drop_node_tree(node: Node) -> void:
   for child in node.get_children():
     node.remove_child(child)
     child.queue_free()
+
+
+static func free_dir(path: String) -> void:
+  # todo: Remove itself too?
+  var dir := Directory.new()
+  var err := dir.open(path)
+  if err != OK:
+    push_error("Error opening temporary directory for freeing %s, error code: %s" % [path, err])
+    return
+  err = dir.list_dir_begin(true)
+  if err != OK:
+    push_error("Error starting iterating temporary directory for freeing %s, error code: %s" % [path, err])
+    return
+  var filename := dir.get_next()
+  while filename != "":
+    if dir.current_is_dir():
+      free_dir("%s/%s" % [path, filename])
+      err = dir.remove(filename)
+      if err != OK:
+        push_error("Error removing temporary directory at %s, error code: %s" % ["%s/%s" % [path, filename], err])
+    else:
+      err = dir.remove(filename)
+      if err != OK:
+        push_error("Error removing temporary file at %s, error code: %s" % ["%s/%s" % [path, filename], err])
+    filename = dir.get_next()
+  dir.list_dir_end()

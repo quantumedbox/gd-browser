@@ -6,6 +6,10 @@ extends Node
 # todo: Make image nodes load in order, currently they're loaded based on where their image data is retrieved
 # todo: Weakref to scene node to which page is rendered, as its needed for redrawing
 
+# Used to say the Page owner that it wants to get to the new url
+signal page_requested(url)
+
+
 onready var n_DOM := find_node("DOM")
 onready var n_HTTPRequestPool := find_node("HTTPRequestPool")
 onready var n_ScriptPool := find_node("ScriptPool")
@@ -58,9 +62,14 @@ func render_to(canvas: Container) -> void:
 
 func _init() -> void:
   var dir := Directory.new()
-  var path := "user://%s" % _generate_temp_name()
+  if not dir.dir_exists("user://temp"):
+    var err := dir.make_dir("user://temp")
+    if err != OK:
+      push_error("Error creating temporary directory for page %s, error code: %s" % [self.url, err])
+      return
+  var path := "user://temp/%s" % _generate_temp_name()
   while dir.dir_exists(path):
-    path = "user://%s" % _generate_temp_name()
+    path = "user://temp/%s" % _generate_temp_name()
   var err := dir.make_dir(path)
   if err != OK:
     push_error("Error creating temporary directory for page %s, error code: %s" % [self.url, err])
@@ -70,39 +79,13 @@ func _init() -> void:
 
 
 func _notification(what) -> void:
-  # todo: Doesn't appear to work...
   if what == NOTIFICATION_PREDELETE:
-    # todo: Is it guaranteed to be called? We might need to take more steps to ensure no data leakage on user filesystem
+    # If this doesn't trigger, next startup will free all the temp files instead
     print_debug("Trying to free temporary directory %s" % self._temp_dir)
-    _free_temp_dir(self._temp_dir)
-
-
-func _free_temp_dir(path: String) -> void:
-  # todo: Remove itself too
-  var dir := Directory.new()
-  var err := dir.open(path)
-  if err != OK:
-    push_error("Error opening temporary directory for freeing %s, error code: %s" % [path, err])
-    return
-  err = dir.list_dir_begin(true)
-  if err != OK:
-    push_error("Error starting iterating temporary directory for freeing %s, error code: %s" % [path, err])
-    return
-  var filename := dir.get_next()
-  while filename != "":
-    if dir.current_is_dir():
-      _free_temp_dir("%s/%s" % [path, filename])
-      err = dir.remove(filename)
-      push_error("Error removing temporary directory at %s, error code: %s" % ["%s/%s" % [path, filename], err])
-    else:
-      err = dir.remove(filename)
-      push_error("Error removing temporary file at %s, error code: %s" % ["%s/%s" % [path, filename], err])
-    filename = dir.get_next()
-  dir.list_dir_end()
+    Shared.free_dir(self._temp_dir)
 
 
 func _process_page_request_response(request: Resource) -> void:
-  # todo: Make it return Container node tree, will be neccessary for implementing tabs
   # todo: Method to parse header information
   #       In particular it might be useful for getting info about document type that is returned
   if request.result != OK:
@@ -231,7 +214,7 @@ func _render_element(node: DomElement, page_canvas: Container) -> void:
         var text_node := preload("res://scenes/Text.tscn").instance()
         text_node.bbcode_text = "[url=%s]%s[/url]" % [node.get_attrbiute("href"), text_content]
         _apply_text_style_by_tag(text_node, node.tag_name)
-        Shared.ok(text_node.connect("meta_clicked", self, "_on_meta_clicked"))
+        Shared.ok(text_node.connect("meta_clicked", self, "_on_link_meta_clicked"))
         page_canvas.add_child(text_node)
 
     "div", "h1", "p", "b":
@@ -292,8 +275,7 @@ func _resolve_scripts(document: DomDocument) -> void:
     if script.type == "text/gdscript":
       var src_attr = script.get_attrbiute("src")
       if src_attr != null:
-        # todo:
-        push_error("Unimplemented")
+        Shared.unimplemented()
         continue
       var source = script.text
       if not source.empty():
@@ -313,6 +295,7 @@ func _resolve_scripts(document: DomDocument) -> void:
         script_instance.document = document
         n_ScriptPool.add_child(script_instance)
         print_debug("Added one running gdscript script")
+    # Silently ignore...
 
 
 func _generate_temp_name() -> String:
@@ -320,8 +303,10 @@ func _generate_temp_name() -> String:
   return randi() as String
 
 
-func _on_meta_clicked(meta) -> void:
-  print(meta)
+func _on_link_meta_clicked(url_) -> void:
+  if url_.find("://") == -1:
+    url_ = "%s/%s" % [self.url, url_]
+  emit_signal("page_requested", url_)
 
 
 func _private_setter(_any) -> void:

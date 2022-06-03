@@ -28,8 +28,8 @@ func _set_text_content(text: String) -> void:
       self._replace_all(node)
 
     ATTRIBUTE_NODE:
-      # todo:
-      push_error("Unimplemented")
+      Shared.unimplemented()
+
 
     TEXT_NODE, COMMENT_NODE:
       # whatwf: Replace data with node this, offset 0, count this’s length, and data the given value.
@@ -89,8 +89,7 @@ func _insert(node, child) -> void:
   # if count == 0:
   #   return
   if child != null:
-    # todo:
-    push_error("Unimplemented")
+    Shared.unimplemented()
     return
   self.add_child(node) # todo: Should be a lot more, lol
   self._children_changed()
@@ -98,7 +97,7 @@ func _insert(node, child) -> void:
 
 func _children_changed() -> void:
   # to: Should signalize that render update is possibly needed to page
-  push_error("Unimplemented")
+  Shared.unimplemented()
 
 
 # todo: Rename? There could also be already something similar in DOM spec

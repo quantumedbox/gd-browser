@@ -13,9 +13,10 @@ Basic support for GDScript in `<script>` elements
 ## TODO
 - Interpreting of basic sectioning elements
 - Simple attributes, such as links
-- Moving to new pages by clicking links
 - Inline text tags for styling of text, probably by using RichTextLabel and BBCode
 - Parsing of HTTP response headers
+- Make it pretty
+- Make it snappy
 
 ## Experimental TODO
 - Ability to load Godot scenes as documents, and integrate them into page directly
