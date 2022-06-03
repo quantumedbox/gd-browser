@@ -36,5 +36,5 @@ func request_page(url: String) -> void:
   var await = self.n_Page.request_document(url)
   while await is GDScriptFunctionState:
     await = yield(await, "completed")
-  if await == 0:
+  if await == true:
     self.n_Page.render_to(self.n_Canvas)

@@ -35,14 +35,17 @@ func request_file(url_: String) -> Resource: # RequestResult
   return result
 
 
-func request_document(url_: String) -> int:
+func request_document(url_: String) -> bool:
   print_debug("Getting document from: %s" % url_)
   url = url_
   var request_result = request_file(url_)
   while request_result is GDScriptFunctionState:
     request_result = yield(request_result, "completed")
   _process_page_request_response(request_result)
-  return request_result.result
+  if request_result.response_code == 200 and request_result.result == 0:
+    return true
+  else:
+    return false
 
 
 func request_image(url_: String): # -> ?Image
@@ -254,24 +257,24 @@ func _render_element(node: DomElement, page_canvas: Container) -> void:
       # Image node
       var src = node.get_attrbiute("src")
       if src:
+        var image_node := preload("res://scenes/Image.tscn").instance()
+        page_canvas.add_child(image_node)
         var image = request_image(self.url + '/' + src) # todo: URL path validation, in general gotta read about URL spec
         while image is GDScriptFunctionState:
           image = yield(image, "completed")
         if image != null:
-          var image_node := preload("res://scenes/Image.tscn").instance()
           var texture := ImageTexture.new()
-          # image.lock()
           texture.create_from_image(image)
-          # image.unlock()
           image_node.texture = texture
-          page_canvas.add_child(image_node)
         else:
           # Fallback to alt text
           var text_content = node.get_attrbiute("alt")
           if text_content:
             var text_node := preload("res://scenes/Text.tscn").instance()
             text_node.bbcode_text = text_content
-            page_canvas.add_child(text_node)
+            page_canvas.add_child_below_node(text_node, image_node)
+            page_canvas.remove_child(image_node)
+            image_node.queue_free()
 
     _:
       # For now unknown tags are used for propagation further down the tree
