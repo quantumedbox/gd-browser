@@ -13,7 +13,7 @@ func _init() -> void:
 
 
 func _get_doctype() -> DomDocumentType:
-  # todo: Search for DocumentType node
+  Shared.unimplemented()
   return null
 
 

@@ -1,8 +1,7 @@
 extends Control
 
 # todo: Error message display to user, probably via console-like interface
-# todo: Remove extending of dom classes, rely on naming and presence of members for conveying implementation of interface
-#       Node types could be denoted by enum, giving the desired reflective capabilities
+#       We could also generate DOM pages to render, so that no new functionalities would need to be added
 
 
 const STARTUP_URL := "https://serenityos.org"
@@ -35,6 +34,7 @@ func request_page(url: String) -> void:
   self.n_Page.connect("page_requested", self, "request_page") # todo: Temp
   add_child(self.n_Page)
   var await = self.n_Page.request_document(url)
-  if await is GDScriptFunctionState:
-    yield(await, "completed")
-  self.n_Page.render_to(self.n_Canvas)
+  while await is GDScriptFunctionState:
+    await = yield(await, "completed")
+  if await == 0:
+    self.n_Page.render_to(self.n_Canvas)

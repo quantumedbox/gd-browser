@@ -1,0 +1,18 @@
+[gd_scene format=2]
+
+[node name="ListItem" type="HBoxContainer"]
+margin_right = 1007.0
+margin_bottom = 45.0
+
+[node name="Marker" type="Label" parent="."]
+margin_right = 8.0
+margin_bottom = 14.0
+size_flags_vertical = 0
+text = "*"
+
+[node name="Items" type="VBoxContainer" parent="."]
+margin_left = 12.0
+margin_right = 1007.0
+margin_bottom = 45.0
+size_flags_horizontal = 3
+size_flags_vertical = 3

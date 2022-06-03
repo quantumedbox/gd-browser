@@ -1,5 +1,5 @@
 extends Node
-# Encapsulated page unit, representing generic document structure
+## Encapsulated page unit, representing generic document structure
 
 # todo: Reuse RequestNodes in n_HTTPRequestPool
 # todo: URL Resource caching singleton
@@ -35,19 +35,20 @@ func request_file(url_: String) -> Resource: # RequestResult
   return result
 
 
-func request_document(url_: String) -> void:
+func request_document(url_: String) -> int:
   print_debug("Getting document from: %s" % url_)
   url = url_
   var request_result = request_file(url_)
-  if request_result is GDScriptFunctionState:
+  while request_result is GDScriptFunctionState:
     request_result = yield(request_result, "completed")
   _process_page_request_response(request_result)
+  return request_result.result
 
 
 func request_image(url_: String): # -> ?Image
   print_debug("Getting image from: %s" % url_)
   var request_result = request_file(url_)
-  if request_result is GDScriptFunctionState:
+  while request_result is GDScriptFunctionState:
     request_result = yield(request_result, "completed")
   var image = _process_image_request_response(request_result)
   if image == null:
@@ -171,7 +172,9 @@ func _populate_tree(root: Node, desc: Dictionary) -> void:
       this = node
 
     "comment": pass # todo: Technically valid node in dom, but not sure whether we really need it
-    _: assert(false, "Node %s unimplemented" % desc["type"])
+    _:
+      push_error("Node %s unimplemented" % desc["type"])
+      return
 
   if "children" in desc:
     assert(desc["children"] is Array)
@@ -217,6 +220,23 @@ func _render_element(node: DomElement, page_canvas: Container) -> void:
         Shared.ok(text_node.connect("meta_clicked", self, "_on_link_meta_clicked"))
         page_canvas.add_child(text_node)
 
+    "blockquote":
+      # Quote block
+      var text_content = node.text_content
+      if text_content:
+        var text_node := preload("res://scenes/Text.tscn").instance()
+        text_node.bbcode_text = "[quote]%s[/quote]" % text_content
+        _apply_text_style_by_tag(text_node, node.tag_name)
+        page_canvas.add_child(text_node)
+
+    "ul":
+      # Unordered list
+      var ul_container := VBoxContainer.new()
+      for child in node.get_children():
+        if child.node_type == DomNode.ELEMENT_NODE:
+          _render_element_ul(child, ul_container)
+      page_canvas.add_child(ul_container)
+
     "div", "h1", "p", "b":
       # todo: <div> and alike should collect child nodes into itself, creating single container object rather than separate ones
       # Text content elements
@@ -235,7 +255,7 @@ func _render_element(node: DomElement, page_canvas: Container) -> void:
       var src = node.get_attrbiute("src")
       if src:
         var image = request_image(self.url + '/' + src) # todo: URL path validation, in general gotta read about URL spec
-        if image is GDScriptFunctionState:
+        while image is GDScriptFunctionState:
           image = yield(image, "completed")
         if image != null:
           var image_node := preload("res://scenes/Image.tscn").instance()
@@ -260,10 +280,37 @@ func _render_element(node: DomElement, page_canvas: Container) -> void:
           _render_node(child, page_canvas)
 
 
+func _render_element_ul(node: DomElement, page_canvas: Container) -> void:
+  match node.tag_name:
+    "li":
+      var item = preload("res://scenes/ItemList.tscn").instance()
+      for child in node.get_children():
+        if child.node_type == DomNode.ELEMENT_NODE:
+          _render_element(child, item.get_child(1))
+      page_canvas.add_child(item)
+    _: _render_element(node, page_canvas)
+
+
 static func _apply_text_style_by_tag(node: RichTextLabel, tag: String) -> void:
   match tag:
+    # todo: That's kinda stupid lol
     "h1":
       var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 26)
+      node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
+    "h2":
+      var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 24)
+      node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
+    "h3":
+      var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 23)
+      node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
+    "h4":
+      var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 22)
+      node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
+    "h5":
+      var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 21)
+      node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
+    "h6":
+      var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 20)
       node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
     "b":
       var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, "Bold")
