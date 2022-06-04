@@ -298,26 +298,12 @@ func _render_element_ul(node: DomElement, page_canvas: Container) -> void:
 
 
 static func _apply_text_style_by_tag(node: RichTextLabel, tag: String) -> void:
+  if tag.length() == 2 and tag[0] == "h" and tag[1].is_valid_integer():
+    # Headings tags of different size
+    var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 20 + tag[1].to_int())
+    node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
+    return
   match tag:
-    # todo: That's kinda stupid lol
-    "h1":
-      var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 26)
-      node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
-    "h2":
-      var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 24)
-      node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
-    "h3":
-      var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 23)
-      node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
-    "h4":
-      var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 22)
-      node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
-    "h5":
-      var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 21)
-      node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
-    "h6":
-      var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, FontManager.DEFAULT_TYPEFACE, 20)
-      node.set("custom_fonts/normal_font", font) # todo: Now we're using RichTextLabel so we need ability to get all possible typefaces to set the overrides
     "b":
       var font := FontManager.request_font(FontManager.DEFAULT_FAMILY, "Bold")
       node.set("custom_fonts/normal_font", font)
