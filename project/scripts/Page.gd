@@ -5,8 +5,10 @@ extends Node
 # todo: URL Resource caching singleton
 # todo: Make image nodes load in order, currently they're loaded based on where their image data is retrieved
 # todo: Weakref to scene node to which page is rendered, as its needed for redrawing
+# todo: Rework temporary resource strategy to allow shared resources between pages
 
 # Used to say the Page owner that it wants to get to the new url
+# (url: URL.URLObject)
 signal page_requested(url)
 
 
@@ -14,19 +16,19 @@ onready var n_DOM := find_node("DOM")
 onready var n_HTTPRequestPool := find_node("HTTPRequestPool")
 onready var n_ScriptPool := find_node("ScriptPool")
 
-var url: String setget _private_setter # todo: Should it be here? We could infer from URL  member of document node in DOM tree
+var url setget _private_setter # todo: Should it be here? We could infer from URL  member of document node in DOM tree
 var title: String = "Untitled Page" # todo: Infer directly from DOM, as this way any change to title node will not necessarily update this value
 
 # Used for storing temporary files related to this particular page, should not clash with any other page's path, nor pollute already existing directories on filesystem
 var _temp_dir: String setget _private_setter
 
 
-func request_file(url_: String) -> Resource: # RequestResult
+func request_file(url_: URL.URLObject) -> Resource: # RequestResult
   var request_node := preload("res://scenes/RequestNode.tscn").instance()
   self.n_HTTPRequestPool.add_child(request_node)
   var err = request_node.request_get(url_)
   if err != OK:
-    push_error("Error on HTTP request while getting, error code: %s, url: %s" % [err, url_])
+    push_error("Error on HTTP request while getting, error code: %s, url: %s" % [err, url_.to_urlstring()])
     return
   yield(request_node, "finished")
   self.n_HTTPRequestPool.remove_child(request_node)
@@ -35,8 +37,8 @@ func request_file(url_: String) -> Resource: # RequestResult
   return result
 
 
-func request_document(url_: String) -> bool:
-  print_debug("Getting document from: %s" % url_)
+func request_document(url_: URL.URLObject) -> bool:
+  print_debug("Getting document from: %s" % url_.to_urlstring())
   url = url_
   var request_result = request_file(url_)
   while request_result is GDScriptFunctionState:
@@ -48,8 +50,8 @@ func request_document(url_: String) -> bool:
     return false
 
 
-func request_image(url_: String): # -> ?Image
-  print_debug("Getting image from: %s" % url_)
+func request_image(url_: URL.URLObject): # -> ?Image
+  print_debug("Getting image from: %s" % url_.to_urlstring())
   var request_result = request_file(url_)
   while request_result is GDScriptFunctionState:
     request_result = yield(request_result, "completed")
@@ -69,14 +71,14 @@ func _init() -> void:
   if not dir.dir_exists("user://temp"):
     var err := dir.make_dir("user://temp")
     if err != OK:
-      push_error("Error creating temporary directory for page %s, error code: %s" % [self.url, err])
+      push_error("Error creating temporary directory for page %s, error code: %s" % [self.url.to_urlstring(), err])
       return
   var path := "user://temp/%s" % _generate_temp_name()
   while dir.dir_exists(path):
     path = "user://temp/%s" % _generate_temp_name()
   var err := dir.make_dir(path)
   if err != OK:
-    push_error("Error creating temporary directory for page %s, error code: %s" % [self.url, err])
+    push_error("Error creating temporary directory for page %s, error code: %s" % [self.url.to_urlstring(), err])
     return
   print_debug("Created temporary directory at %s" % path)
   _temp_dir = path
@@ -140,7 +142,7 @@ func _populate_tree(root: Node, desc: Dictionary) -> void:
   match desc["type"]:
     "document":
       var node := DomDocument.new() as DomDocument
-      node.url = self.url
+      node.url = self.url.to_urlstring()
       var doctype_node := DomDocumentType.new() as DomDocumentType
       if "public_identifier" in desc:
         doctype_node.publicId = desc["public_identifier"]
@@ -225,6 +227,7 @@ func _render_element(node: DomElement, page_canvas: Container) -> void:
 
     "blockquote":
       # Quote block
+      # todo: Test
       var text_content = node.text_content
       if text_content:
         var text_node := preload("res://scenes/Text.tscn").instance()
@@ -259,7 +262,7 @@ func _render_element(node: DomElement, page_canvas: Container) -> void:
       if src:
         var image_node := preload("res://scenes/Image.tscn").instance()
         page_canvas.add_child(image_node)
-        var image = request_image(self.url + '/' + src) # todo: URL path validation, in general gotta read about URL spec
+        var image = request_image(URL.parse(src, self.url))
         while image is GDScriptFunctionState:
           image = yield(image, "completed")
         if image != null:
@@ -353,10 +356,12 @@ func _generate_temp_name() -> String:
   return randi() as String
 
 
-func _on_link_meta_clicked(url_) -> void:
-  if url_.find("://") == -1:
-    url_ = "%s/%s" % [self.url, url_]
-  emit_signal("page_requested", url_)
+func _on_link_meta_clicked(urlstring) -> void:
+  var url_result = URL.parse(urlstring, self.url)
+  if url_result.failure:
+    push_error("Ill-formed url")
+    return
+  emit_signal("page_requested", url_result)
 
 
 func _private_setter(_any) -> void:

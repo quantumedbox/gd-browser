@@ -3,3 +3,6 @@
 	url = https://github.com/quantumedbox/gd-gumbo
 [submodule "gd-gumbo/"]
 	branch = main
+[submodule "gd-url-parser"]
+	path = gd-url-parser
+	url = https://github.com/quantumedbox/gd-url-parser

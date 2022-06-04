@@ -11,10 +11,10 @@ class RequestResult extends Resource:
 var request_result: Resource # RequestResult
 
 
-func request_get(url: String) -> int: # Error
-  assert(not url.empty())
+func request_get(url: URL.URLObject) -> int: # Error
+  assert(not url.failure)
   Shared.ok(self.connect("request_completed", self, "_on_request_completed"))
-  return self.request(url)
+  return self.request(url.to_urlstring())
 
 
 func _on_request_completed(result_: int, response_code_: int, headers_: PoolStringArray, body_: PoolByteArray) -> void:
