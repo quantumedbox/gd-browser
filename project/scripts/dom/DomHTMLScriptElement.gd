@@ -14,7 +14,7 @@ func _get_type() -> String:
     return ""
 
 
-func _set_text(text_: String) -> void:
+func _set_text(_text_: String) -> void:
   ## https://html.spec.whatwg.org/multipage/scripting.html#dom-script-text
   Shared.unimplemented()
 

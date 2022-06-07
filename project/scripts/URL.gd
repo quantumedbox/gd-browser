@@ -81,7 +81,7 @@ func parse(urlstring: String, base: URLObject = null) -> URLObject:
 func parse_query(url: URLObject, sep="&") -> Array:
   assert(not url.failure)
   # todo: Test
-  return n_URLParser.parse_query("&")
+  return n_URLParser.parse_query(sep)
 
 
 static func _default_port(url: URLObject) -> void:

@@ -1,5 +1,9 @@
-# gd-browser Simplistic Browser Project
-Firstly something to test [gd-gumbo](https://github.com/quantumedbox/gd-gumbo) for, but there's neat potential with this.
+# gd-browser Simplistic Browser
+
+## Building
+Currently two GDNative modules are required that are adjacent to gd-browser: [gd-html-parser](https://github.com/quantumedbox/gd-html-parser) and [gd-url-parser](https://github.com/quantumedbox/gd-url-parser), you need to compile those and place their `bin` folder output into `project` folder, where Godot project is located.
+
+Prebuilt binaries are possible in the future, but it's currently not in any stable state for that.
 
 ## Demo
 Current gd-browser state:
@@ -17,6 +21,7 @@ Basic support for GDScript in `<script>` elements
 - Parsing of HTTP response headers
 - Make it pretty
 - Make it snappy
-
-## Experimental TODO
+- Standardize GDScript document scripting
 - Ability to load Godot scenes as documents, and integrate them into page directly
+- project.godot in embed, should direct to main scene, possibly respecting settings if possible
+- Resolution of embedded scene's scripts `load()` and `preload()` functions, they need to point to local storage instead of `res://`

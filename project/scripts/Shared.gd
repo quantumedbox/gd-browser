@@ -62,6 +62,53 @@ static func drop_node_tree(node: Node) -> void:
     child.queue_free()
 
 
+static func make_temp_dir(path: String) -> String:
+  var dir := Directory.new()
+  var name := "%s/%s" % [path, randi() as String]
+  while dir.dir_exists(name):
+    name = "%s/%s" % [path, randi() as String]
+  var err := dir.make_dir_recursive(name)
+  if err != OK:
+    push_error("Error creating temporary directory at %s, error code: %s" % [name, err])
+    return ""
+  return name
+
+
+static func get_temp_file_name(dirpath: String) -> String:
+  var dir := Directory.new()
+  var name := "%s/%s" % [dirpath, randi() as String]
+  while dir.file_exists(name):
+    name = "%s/%s" % [dirpath, randi() as String]
+  return name
+
+
+static func write_file(path: String, content) -> bool:
+  assert(not path.empty())
+  assert(not content.empty())
+  var file := File.new()
+  var err := file.open(path, File.WRITE)
+  if err != OK:
+    push_error("Cannot open temporary file for writing source at %s, error code: %s" % [path, err])
+    return false
+  if content is String:
+    file.store_string(content) # todo: Could we get failure on write?
+  elif content is PoolByteArray:
+    file.store_buffer(content)
+  else:
+    assert(false, "Invalid content for writing to file")
+    file.close()
+    return false
+  file.close()
+  return true
+
+
+static func write_temp_file(dirpath: String, content, extension: String = "tmp") -> String:
+  var path := get_temp_file_name(dirpath) + '.' + extension
+  if not write_file(path, content):
+    return ""
+  return path
+
+
 static func free_dir(path: String) -> void:
   # todo: Remove itself too?
   var dir := Directory.new()
@@ -86,3 +133,12 @@ static func free_dir(path: String) -> void:
         push_error("Error removing temporary file at %s, error code: %s" % ["%s/%s" % [path, filename], err])
     filename = dir.get_next()
   dir.list_dir_end()
+
+
+static func deepcopy(any): # -> Variant
+  assert(any != null)
+  var result = ClassDB.instance(any.get_class())
+  for prop in any.get_property_list():
+    var prop_name := prop["name"] as String
+    result.set(prop_name, any.get(prop_name))
+  return result

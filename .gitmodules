@@ -1,5 +1,5 @@
 [submodule "gd-gumbo"]
-	path = gd-gumbo
+	path = gd-html-parser
 	url = https://github.com/quantumedbox/gd-gumbo
 [submodule "gd-gumbo/"]
 	branch = main

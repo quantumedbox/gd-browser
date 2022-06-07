@@ -14,24 +14,29 @@ var n_Page: Node = null # todo: Temp
 
 func _ready() -> void:
   # Ensure clearance of temporaries of previous session
-  Shared.free_dir("user://temp")
+  Shared.free_dir("res://temp") # todo: Make path to temp root a project setting
   Shared.ok(self.n_SearchBox.connect("text_entered", self, "_on_search_made"))
-  request_page(URL.parse(STARTUP_URL))
-  n_SearchBox.text = STARTUP_URL
+  var args := OS.get_cmdline_args()
+  if args.size() > 0:
+    request_page(URL.parse(args[0]))
+  else:
+    request_page(URL.parse(STARTUP_URL))
 
 
-func _on_search_made(url: URL.URLObject) -> void:
-  request_page(url)
+func _on_search_made(url: String) -> void:
+  request_page(URL.parse(url))
 
 
 func request_page(url: URL.URLObject) -> void:
+  assert(not url.failure)
+  n_SearchBox.text = url.to_urlstring()
   # todo: Implement "file:///" URLs by invoking filesystem operations
   if self.n_Page != null:
     remove_child(self.n_Page)
     self.n_Page.queue_free()
     Shared.drop_node_tree(self.n_Canvas)
   self.n_Page = preload("res://scenes/Page.tscn").instance()
-  self.n_Page.connect("page_requested", self, "request_page") # todo: Temp
+  Shared.ok(self.n_Page.connect("page_requested", self, "request_page")) # todo: Temp
   add_child(self.n_Page)
   var await = self.n_Page.request_document(url)
   while await is GDScriptFunctionState:
